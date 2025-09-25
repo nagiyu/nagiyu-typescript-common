@@ -9,6 +9,6 @@ module.exports = {
     ...tsJestTransformCfg,
   },
   moduleNameMapper: {
-    "^@common/(.*)$": "<rootDir>/$1",
+    "^@common/(.*)$": "<rootDir>/common/$1",
   }
 };
