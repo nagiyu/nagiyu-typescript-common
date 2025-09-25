@@ -1,6 +1,6 @@
 import CRUDServiceBase from '@common/services/CRUDServiceBase';
 import DataAccessorBase from '@common/services/DataAccessorBase';
-import DynamoDBServiceMock from '@common/tests/mock/services/aws/DynamoDBServiceMock';
+import DynamoDBServiceMock from '@common-mock/services/aws/DynamoDBServiceMock';
 import ErrorUtil from '@common/utils/ErrorUtil';
 import { DataTypeBase } from '@common/interfaces/data/DataTypeBase';
 import { RecordTypeBase } from '@common/interfaces/record/RecordTypeBase';
