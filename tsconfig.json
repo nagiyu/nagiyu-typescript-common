@@ -3,9 +3,6 @@
     "paths": {
       "@common/*": [
         "./common/*"
-      ],
-      "@common-mock/*": [
-        "./tests/mock/*"
       ]
     },
     "esModuleInterop": true
