@@ -4,6 +4,17 @@ import { OpenAIChatHistory, OpenAIChatOptions } from '@common/interfaces/OpenAIM
 export default class OpenAIServiceMock implements OpenAIServiceType {
   private conversations: { messages: OpenAIChatHistory; response: string }[] = [];
   private defaultResponse = 'This is a mock response from OpenAI.';
+  private apiKey: string | null = null;
+
+  /**
+   * Creates a new OpenAI mock service instance.
+   * @param apiKey Optional API key for testing purposes.
+   */
+  constructor(apiKey?: string) {
+    if (apiKey) {
+      this.apiKey = apiKey;
+    }
+  }
 
   /**
    * Gets all conversation history for testing purposes.

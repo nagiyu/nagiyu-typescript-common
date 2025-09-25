@@ -16,17 +16,28 @@ OpenAIServiceは、OpenAI APIを使用してチャット機能を提供するサ
 ```typescript
 import OpenAIService from '@common/services/OpenAIService';
 import { OpenAIChatHistory } from '@common/interfaces/OpenAIMessageType';
+import { OPENAI_MESSAGE_ROLES } from '@common/consts/OpenAIConst';
 
 const openaiService = new OpenAIService();
 
 // 基本的なチャット
 const messages: OpenAIChatHistory = [
-  { role: 'system', content: 'あなたは親切なアシスタントです。' },
-  { role: 'user', content: 'こんにちは！' }
+  { role: OPENAI_MESSAGE_ROLES.SYSTEM, content: 'あなたは親切なアシスタントです。' },
+  { role: OPENAI_MESSAGE_ROLES.USER, content: 'こんにちは！' }
 ];
 
 const response = await openaiService.chat(messages);
 console.log(response); // OpenAIからの応答
+```
+
+### APIキーを指定した初期化
+
+```typescript
+// APIキーを直接指定してサービスを初期化
+const openaiService = new OpenAIService('your-openai-api-key');
+
+// または、AWS Secrets Managerから自動取得（従来通り）
+const openaiService = new OpenAIService();
 ```
 
 ### 新しい会話の開始
@@ -43,9 +54,9 @@ const response = await openaiService.startConversation(
 ```typescript
 // 既存の会話履歴
 let conversation: OpenAIChatHistory = [
-  { role: 'system', content: 'あなたは親切なアシスタントです。' },
-  { role: 'user', content: 'こんにちは！' },
-  { role: 'assistant', content: 'こんにちは！お手伝いできることはありますか？' }
+  { role: OPENAI_MESSAGE_ROLES.SYSTEM, content: 'あなたは親切なアシスタントです。' },
+  { role: OPENAI_MESSAGE_ROLES.USER, content: 'こんにちは！' },
+  { role: OPENAI_MESSAGE_ROLES.ASSISTANT, content: 'こんにちは！お手伝いできることはありますか？' }
 ];
 
 // 会話を継続
@@ -73,10 +84,23 @@ const response = await openaiService.chat(messages, {
 ### OpenAIMessageType
 
 ```typescript
+import { OpenAIMessageRole } from '@common/consts/OpenAIConst';
+
 interface OpenAIMessageType {
-  role: 'system' | 'user' | 'assistant';  // メッセージの役割
-  content: string;                        // メッセージの内容
+  role: OpenAIMessageRole;  // メッセージの役割（定数から取得）
+  content: string;          // メッセージの内容
 }
+```
+
+### OpenAI定数
+
+```typescript
+import { OPENAI_MESSAGE_ROLES } from '@common/consts/OpenAIConst';
+
+// 使用可能な役割
+OPENAI_MESSAGE_ROLES.SYSTEM    // 'system'
+OPENAI_MESSAGE_ROLES.USER      // 'user'
+OPENAI_MESSAGE_ROLES.ASSISTANT // 'assistant'
 ```
 
 ### OpenAIChatHistory

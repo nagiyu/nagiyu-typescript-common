@@ -1,7 +1,4 @@
-/**
- * Represents the role of a message in an OpenAI chat conversation.
- */
-export type OpenAIMessageRole = 'system' | 'user' | 'assistant';
+import { OpenAIMessageRole } from '@common/consts/OpenAIConst';
 
 /**
  * Represents a single message in an OpenAI chat conversation.
