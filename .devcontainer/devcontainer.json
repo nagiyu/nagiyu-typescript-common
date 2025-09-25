@@ -1,0 +1,20 @@
+{
+  "name": "Nagiyu TypeScript Common",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.vscode-typescript-next",
+        "ms-vscode.vscode-json",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-eslint",
+        "orta.vscode-jest",
+        "ms-vscode.vscode-npm-scripts",
+        "amazonwebservices.aws-toolkit-vscode"
+      ]
+    }
+  },
+  "forwardPorts": [],
+  "postCreateCommand": "npm install",
+  "remoteUser": "node"
+}
