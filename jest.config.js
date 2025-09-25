@@ -10,5 +10,6 @@ module.exports = {
   },
   moduleNameMapper: {
     "^@common/(.*)$": "<rootDir>/common/$1",
+    "^@common-mock/(.*)$": "<rootDir>/tests/mock/$1",
   }
 };
