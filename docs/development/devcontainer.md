@@ -27,7 +27,6 @@
 - **ESLint**: コードリンター
 - **Jest**: テストフレームワークサポート
 - **NPM Scripts**: npm スクリプトサポート
-- **AWS Toolkit**: AWS 開発支援ツール
 
 ### Workspace 設定
 
