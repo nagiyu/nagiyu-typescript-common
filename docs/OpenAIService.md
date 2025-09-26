@@ -18,7 +18,8 @@ import OpenAIService from '@common/services/OpenAIService';
 import { OpenAIChatHistory } from '@common/interfaces/OpenAIMessageType';
 import { OPENAI_MESSAGE_ROLES } from '@common/consts/OpenAIConst';
 
-const openaiService = new OpenAIService();
+// APIキーは必須パラメータ
+const openaiService = new OpenAIService('your-openai-api-key');
 
 // 基本的なチャット
 const messages: OpenAIChatHistory = [
@@ -30,14 +31,18 @@ const response = await openaiService.chat(messages);
 console.log(response); // OpenAIからの応答
 ```
 
-### APIキーを指定した初期化
+### サービスの初期化
 
 ```typescript
-// APIキーを直接指定してサービスを初期化
+// APIキーは必須です
 const openaiService = new OpenAIService('your-openai-api-key');
 
-// または、AWS Secrets Managerから自動取得（従来通り）
-const openaiService = new OpenAIService();
+// AWS Secrets Managerを使用する場合は、利用側でAPIキーを取得してください
+import SecretsManagerUtil from '@common/aws/SecretsManagerUtil';
+
+const secretName = process.env.PROJECT_SECRET!;
+const apiKey = await SecretsManagerUtil.getSecretValue(secretName, 'OPENAI_API_KEY');
+const openaiService = new OpenAIService(apiKey);
 ```
 
 ### 新しい会話の開始
@@ -121,13 +126,25 @@ interface OpenAIChatOptions {
 
 ## 設定
 
-### AWS Secrets Manager
+### APIキーの設定
 
-OpenAI APIキーはAWS Secrets Managerから取得されます。
+OpenAI APIキーはコンストラクタで必須パラメータとして指定します。
 
-**必要な設定:**
-- Secret Name: `process.env.PROJECT_SECRET` で指定
-- Key: `OPENAI_API_KEY`
+```typescript
+const openaiService = new OpenAIService('your-openai-api-key');
+```
+
+### AWS Secrets Managerとの連携
+
+AWS Secrets Managerを使用する場合は、利用側でAPIキーを取得してからサービスを初期化してください。
+
+```typescript
+import SecretsManagerUtil from '@common/aws/SecretsManagerUtil';
+
+const secretName = process.env.PROJECT_SECRET!;
+const apiKey = await SecretsManagerUtil.getSecretValue(secretName, 'OPENAI_API_KEY');
+const openaiService = new OpenAIService(apiKey);
+```
 
 ### 環境変数
 
@@ -138,13 +155,34 @@ PROCESS_ENV=local|development|production  # 環境設定
 
 ## テスト
 
+### モックサービス
+
 モックサービス `OpenAIServiceMock` が用意されており、テスト時に使用できます。
 
 ```typescript
 import OpenAIServiceMock from '@common-mock/services/OpenAIServiceMock';
 
-const mockService = new OpenAIServiceMock();
+// APIキーは必須です（テスト用の値でOK）
+const mockService = new OpenAIServiceMock('test-api-key');
 mockService.setDefaultResponse('カスタムモック応答');
+
+const response = await mockService.chat([
+  { role: OPENAI_MESSAGE_ROLES.USER, content: 'テストメッセージ' }
+]);
+```
+
+### 実際のOpenAI APIを使用したテスト
+
+実際のOpenAI APIを呼び出すテストも用意されていますが、デフォルトではスキップされています。
+
+```bash
+# テストを有効にするには、テストファイル内の .skip を削除してください
+# tests/OpenAIService.test.ts の describe.skip('Real OpenAI API Tests', ...) 部分
+```
+
+実際のAPIテストを実行する場合：
+1. 環境変数 `OPENAI_API_KEY` に実際のAPIキーを設定
+2. テストファイルの `describe.skip` を `describe` に変更
 
 const response = await mockService.chat([
   { role: 'user', content: 'テストメッセージ' }

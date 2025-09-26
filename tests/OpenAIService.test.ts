@@ -5,9 +5,10 @@ import { OPENAI_MESSAGE_ROLES } from '@common/consts/OpenAIConst';
 
 describe('OpenAIService', () => {
   let mockService: OpenAIServiceMock;
+  const testApiKey = 'test-api-key-123';
 
   beforeEach(() => {
-    mockService = new OpenAIServiceMock();
+    mockService = new OpenAIServiceMock(testApiKey);
   });
 
   describe('Mock Service Tests', () => {
@@ -118,13 +119,13 @@ describe('OpenAIService', () => {
 
   describe('OpenAIService Helper Methods', () => {
     let service: OpenAIService;
+    const testApiKey = 'test-api-key-123';
 
     beforeEach(() => {
-      service = new OpenAIService();
+      service = new OpenAIService(testApiKey);
     });
 
     it('should create service with API key constructor', () => {
-      const testApiKey = 'test-api-key-123';
       const serviceWithKey = new OpenAIService(testApiKey);
       
       expect(serviceWithKey).toBeInstanceOf(OpenAIService);
@@ -200,5 +201,82 @@ describe('OpenAIService', () => {
       expect(conversation[1].role).toBe(OPENAI_MESSAGE_ROLES.USER);
       expect(conversation[2].role).toBe(OPENAI_MESSAGE_ROLES.ASSISTANT);
     });
+  });
+
+  // Real OpenAI API tests (skipped by default)
+  // To run these tests, remove the .skip and provide a real API key
+  describe.skip('Real OpenAI API Tests', () => {
+    let service: OpenAIService;
+    const realApiKey = process.env.OPENAI_API_KEY || 'your-real-api-key-here';
+
+    beforeEach(() => {
+      service = new OpenAIService(realApiKey);
+    });
+
+    it('should make actual OpenAI API call for basic chat', async () => {
+      const messages: OpenAIChatHistory = [
+        { role: OPENAI_MESSAGE_ROLES.SYSTEM, content: 'You are a helpful assistant. Respond with exactly "Hello World" and nothing else.' },
+        { role: OPENAI_MESSAGE_ROLES.USER, content: 'Please say hello.' },
+      ];
+
+      const response = await service.chat(messages);
+
+      expect(typeof response).toBe('string');
+      expect(response.length).toBeGreaterThan(0);
+    }, 30000); // 30 second timeout for API call
+
+    it('should handle startConversation with real API', async () => {
+      const response = await service.startConversation(
+        'You are a helpful assistant. Always respond with exactly "Test response" and nothing else.',
+        'Hello, please respond.'
+      );
+
+      expect(typeof response).toBe('string');
+      expect(response.length).toBeGreaterThan(0);
+    }, 30000);
+
+    it('should handle continueConversation with real API', async () => {
+      let conversation: OpenAIChatHistory = [
+        { role: OPENAI_MESSAGE_ROLES.SYSTEM, content: 'You are a helpful assistant. Always keep responses under 10 words.' },
+        { role: OPENAI_MESSAGE_ROLES.USER, content: 'Hello' },
+      ];
+
+      const firstResponse = await service.chat(conversation);
+      conversation = service.addAssistantResponse(conversation, firstResponse);
+
+      const secondResponse = await service.continueConversation(
+        conversation,
+        'How are you?'
+      );
+
+      expect(typeof secondResponse).toBe('string');
+      expect(secondResponse.length).toBeGreaterThan(0);
+    }, 30000);
+
+    it('should handle different models with real API', async () => {
+      const messages: OpenAIChatHistory = [
+        { role: OPENAI_MESSAGE_ROLES.USER, content: 'Say "test" and nothing else.' },
+      ];
+
+      const response = await service.chat(messages, {
+        model: 'gpt-3.5-turbo',
+        maxTokens: 10,
+        temperature: 0
+      });
+
+      expect(typeof response).toBe('string');
+      expect(response.length).toBeGreaterThan(0);
+    }, 30000);
+
+    it('should handle errors gracefully with real API', async () => {
+      const messages: OpenAIChatHistory = [
+        { role: OPENAI_MESSAGE_ROLES.USER, content: 'Test message' },
+      ];
+
+      // Test with invalid model (should throw error)
+      await expect(service.chat(messages, { model: 'invalid-model-name' }))
+        .rejects
+        .toThrow();
+    }, 30000);
   });
 });

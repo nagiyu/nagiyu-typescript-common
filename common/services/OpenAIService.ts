@@ -1,50 +1,21 @@
 import OpenAI from 'openai';
 
 import ErrorUtil from '@common/utils/ErrorUtil';
-import SecretsManagerUtil from '@common/aws/SecretsManagerUtil';
 import { OpenAIChatHistory, OpenAIChatOptions, OpenAIMessageType } from '@common/interfaces/OpenAIMessageType';
-import { OPENAI_DEFAULTS } from '@common/consts/OpenAIConst';
 
 export interface OpenAIServiceType {
   chat(messages: OpenAIChatHistory, options?: OpenAIChatOptions): Promise<string>;
 }
 
 export default class OpenAIService implements OpenAIServiceType {
-  private openaiClient: OpenAI | null = null;
-  private apiKey: string | null = null;
+  private openaiClient: OpenAI;
 
   /**
    * Creates a new OpenAI service instance.
-   * @param apiKey Optional API key. If not provided, will be retrieved from AWS Secrets Manager.
+   * @param apiKey Required OpenAI API key.
    */
-  constructor(apiKey?: string) {
-    if (apiKey) {
-      this.apiKey = apiKey;
-      this.openaiClient = new OpenAI({ apiKey });
-    }
-  }
-
-  /**
-   * Initializes the OpenAI client with API key from AWS Secrets Manager.
-   * @param initLoad If true, always use credentials from environment variables.
-   */
-  private async getOpenAIClient(initLoad = false): Promise<OpenAI> {
-    if (this.openaiClient && this.apiKey) {
-      return this.openaiClient;
-    }
-
-    try {
-      const secretName = process.env.PROJECT_SECRET!;
-      this.apiKey = await SecretsManagerUtil.getSecretValue(secretName, OPENAI_DEFAULTS.SECRETS_KEY, initLoad);
-      
-      this.openaiClient = new OpenAI({
-        apiKey: this.apiKey,
-      });
-
-      return this.openaiClient;
-    } catch (error) {
-      ErrorUtil.throwError('Failed to initialize OpenAI client', error);
-    }
+  constructor(apiKey: string) {
+    this.openaiClient = new OpenAI({ apiKey });
   }
 
   /**
@@ -59,10 +30,8 @@ export default class OpenAIService implements OpenAIServiceType {
     }
 
     try {
-      const client = await this.getOpenAIClient();
-      
-      const completion = await client.chat.completions.create({
-        model: options?.model || OPENAI_DEFAULTS.MODEL,
+      const completion = await this.openaiClient.chat.completions.create({
+        model: options?.model || 'gpt-3.5-turbo',
         messages: messages.map(msg => ({
           role: msg.role,
           content: msg.content,
