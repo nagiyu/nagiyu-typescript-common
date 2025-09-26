@@ -9,8 +9,7 @@
         "esbenp.prettier-vscode",
         "ms-vscode.vscode-eslint",
         "orta.vscode-jest",
-        "ms-vscode.vscode-npm-scripts",
-        "amazonwebservices.aws-toolkit-vscode"
+        "ms-vscode.vscode-npm-scripts"
       ]
     }
   },
