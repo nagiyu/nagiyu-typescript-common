@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "ms-vscode.vscode-typescript-next",
+    "ms-vscode.vscode-json",
+    "esbenp.prettier-vscode",
+    "ms-vscode.vscode-eslint",
+    "orta.vscode-jest",
+    "ms-vscode.vscode-npm-scripts"
+  ]
+}
