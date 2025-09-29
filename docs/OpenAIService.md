@@ -78,9 +78,25 @@ conversation = openaiService.addAssistantResponse(conversation, newResponse);
 
 ```typescript
 const response = await openaiService.chat(messages, {
-  model: 'gpt-4',           // 使用するモデル（デフォルト: 'gpt-3.5-turbo'）
+  model: 'gpt-5',           // 使用するモデル（デフォルト: 'gpt-4.1'）
   maxTokens: 1000,          // 最大トークン数
   temperature: 0.7          // 応答のランダム性（0-2）
+});
+```
+
+利用可能なモデル:
+- `OPENAI_MODEL.GPT_4_1_MINI`: 'gpt-4.1-mini'
+- `OPENAI_MODEL.GPT_4_1`: 'gpt-4.1'
+- `OPENAI_MODEL.GPT_5`: 'gpt-5'
+
+```typescript
+import { OPENAI_MODEL } from '@common/consts/OpenAIConst';
+
+// GPT-5を使用する例
+const response = await openaiService.chat(messages, {
+  model: OPENAI_MODEL.GPT_5,
+  maxTokens: 1000,
+  temperature: 0.7
 });
 ```
 
