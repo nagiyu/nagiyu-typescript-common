@@ -3,7 +3,7 @@
  */
 export const OPENAI_MESSAGE_ROLES = {
   SYSTEM: 'system',
-  USER: 'user', 
+  USER: 'user',
   ASSISTANT: 'assistant'
 } as const;
 
@@ -11,3 +11,10 @@ export const OPENAI_MESSAGE_ROLES = {
  * Type for OpenAI message roles
  */
 export type OpenAIMessageRole = typeof OPENAI_MESSAGE_ROLES[keyof typeof OPENAI_MESSAGE_ROLES];
+
+export const OPENAI_MODEL = {
+  GPT_4_1_MINI: 'gpt-4.1-mini',
+  GPT_4_1: 'gpt-4.1',
+} as const;
+
+export type OpenAIModel = typeof OPENAI_MODEL[keyof typeof OPENAI_MODEL];

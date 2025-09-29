@@ -1,7 +1,7 @@
 import OpenAIService from '@common/services/OpenAIService';
 import OpenAIServiceMock from '@common-mock/services/OpenAIServiceMock';
 import { OpenAIChatHistory, OpenAIMessageType } from '@common/interfaces/OpenAIMessageType';
-import { OPENAI_MESSAGE_ROLES } from '@common/consts/OpenAIConst';
+import { OPENAI_MESSAGE_ROLES, OPENAI_MODEL } from '@common/consts/OpenAIConst';
 
 describe('OpenAIService', () => {
   let mockService: OpenAIServiceMock;
@@ -70,9 +70,9 @@ describe('OpenAIService', () => {
         { role: OPENAI_MESSAGE_ROLES.USER, content: 'Random question' },
       ];
 
-      const response = await mockService.chat(messages, { model: 'gpt-4' });
+      const response = await mockService.chat(messages, { model: OPENAI_MODEL.GPT_4_1 });
 
-      expect(response).toBe('This is a mock response from OpenAI. (using gpt-4)');
+      expect(response).toBe('This is a mock response from OpenAI. (using gpt-4.1)');
     });
 
     it('should allow custom default response', async () => {
@@ -111,7 +111,7 @@ describe('OpenAIService', () => {
     it('should support constructor with API key', () => {
       const testApiKey = 'test-api-key-123';
       const mockServiceWithKey = new OpenAIServiceMock(testApiKey);
-      
+
       // The mock service should be created successfully with the API key
       expect(mockServiceWithKey).toBeInstanceOf(OpenAIServiceMock);
     });
@@ -127,7 +127,7 @@ describe('OpenAIService', () => {
 
     it('should create service with API key constructor', () => {
       const serviceWithKey = new OpenAIService(testApiKey);
-      
+
       expect(serviceWithKey).toBeInstanceOf(OpenAIService);
     });
 
@@ -144,7 +144,7 @@ describe('OpenAIService', () => {
         role: OPENAI_MESSAGE_ROLES.ASSISTANT,
         content: 'Hi there!'
       });
-      
+
       // Original history should not be modified
       expect(history).toHaveLength(2);
     });
@@ -157,10 +157,10 @@ describe('OpenAIService', () => {
 
       // Add assistant response
       conversation = service.addAssistantResponse(conversation, 'Hi there!');
-      
+
       // Add another user message
       conversation = [...conversation, { role: OPENAI_MESSAGE_ROLES.USER, content: 'How are you?' }];
-      
+
       // Add another assistant response
       conversation = service.addAssistantResponse(conversation, 'I\'m doing well, thank you!');
 
@@ -181,7 +181,7 @@ describe('OpenAIService', () => {
       };
 
       const userMessage: OpenAIMessageType = {
-        role: OPENAI_MESSAGE_ROLES.USER, 
+        role: OPENAI_MESSAGE_ROLES.USER,
         content: 'Hello, world!'
       };
 
@@ -210,11 +210,6 @@ describe('OpenAIService', () => {
     const realApiKey = process.env.OPENAI_API_KEY || 'your-real-api-key-here';
 
     beforeEach(() => {
-      // Skip if no real API key is provided
-      if (!process.env.OPENAI_API_KEY) {
-        console.log('Skipping real API tests - OPENAI_API_KEY not provided');
-        return;
-      }
       service = new OpenAIService(realApiKey);
     });
 
@@ -225,6 +220,8 @@ describe('OpenAIService', () => {
       ];
 
       const response = await service.chat(messages);
+
+      console.log('OpenAI API response:', response);
 
       expect(typeof response).toBe('string');
       expect(response.length).toBeGreaterThan(0);
@@ -247,12 +244,17 @@ describe('OpenAIService', () => {
       ];
 
       const firstResponse = await service.chat(conversation);
+
+      console.log('OpenAI API 1st response:', firstResponse);
+
       conversation = service.addAssistantResponse(conversation, firstResponse);
 
       const secondResponse = await service.continueConversation(
         conversation,
         'How are you?'
       );
+
+      console.log('OpenAI API 2nd response:', secondResponse);
 
       expect(typeof secondResponse).toBe('string');
       expect(secondResponse.length).toBeGreaterThan(0);
@@ -264,24 +266,15 @@ describe('OpenAIService', () => {
       ];
 
       const response = await service.chat(messages, {
-        model: 'gpt-3.5-turbo',
+        model: OPENAI_MODEL.GPT_4_1_MINI,
         maxTokens: 10,
         temperature: 0
       });
 
+      console.log('OpenAI API response:', response);
+
       expect(typeof response).toBe('string');
       expect(response.length).toBeGreaterThan(0);
-    }, 30000);
-
-    it('should handle errors gracefully with real API', async () => {
-      const messages: OpenAIChatHistory = [
-        { role: OPENAI_MESSAGE_ROLES.USER, content: 'Test message' },
-      ];
-
-      // Test with invalid model (should throw error)
-      await expect(service.chat(messages, { model: 'completely-invalid-model-name-12345' }))
-        .rejects
-        .toThrow();
     }, 30000);
   });
 });

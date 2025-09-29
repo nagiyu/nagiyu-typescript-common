@@ -1,7 +1,8 @@
 import OpenAI from 'openai';
 
 import ErrorUtil from '@common/utils/ErrorUtil';
-import { OpenAIChatHistory, OpenAIChatOptions, OpenAIMessageType } from '@common/interfaces/OpenAIMessageType';
+import { OpenAIChatHistory, OpenAIChatOptions } from '@common/interfaces/OpenAIMessageType';
+import { OPENAI_MODEL } from '@common/consts/OpenAIConst';
 
 export interface OpenAIServiceType {
   chat(messages: OpenAIChatHistory, options?: OpenAIChatOptions): Promise<string>;
@@ -31,12 +32,12 @@ export default class OpenAIService implements OpenAIServiceType {
 
     try {
       const completion = await this.openaiClient.chat.completions.create({
-        model: options?.model || 'gpt-3.5-turbo',
+        model: options?.model || OPENAI_MODEL.GPT_4_1,
         messages: messages.map(msg => ({
           role: msg.role,
           content: msg.content,
         })),
-        max_tokens: options?.maxTokens,
+        max_completion_tokens: options?.maxTokens,
         temperature: options?.temperature,
       });
 

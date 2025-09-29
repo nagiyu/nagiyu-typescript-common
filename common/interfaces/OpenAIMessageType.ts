@@ -1,4 +1,4 @@
-import { OpenAIMessageRole } from '@common/consts/OpenAIConst';
+import { OpenAIMessageRole, OpenAIModel } from '@common/consts/OpenAIConst';
 
 /**
  * Represents a single message in an OpenAI chat conversation.
@@ -19,10 +19,10 @@ export type OpenAIChatHistory = OpenAIMessageType[];
  * Configuration options for OpenAI chat completion requests.
  */
 export interface OpenAIChatOptions {
-  /** The model to use for chat completion (default: 'gpt-3.5-turbo') */
-  model?: string;
+  /** The model to use for chat completion */
+  model?: OpenAIModel;
   /** Maximum number of tokens to generate */
   maxTokens?: number;
-  /** Temperature for response randomness (0-2) */
+  /** Temperature for response randomness */
   temperature?: number;
 }
