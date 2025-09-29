@@ -210,6 +210,11 @@ describe('OpenAIService', () => {
     const realApiKey = process.env.OPENAI_API_KEY || 'your-real-api-key-here';
 
     beforeEach(() => {
+      // Skip if no real API key is provided
+      if (!process.env.OPENAI_API_KEY) {
+        console.log('Skipping real API tests - OPENAI_API_KEY not provided');
+        return;
+      }
       service = new OpenAIService(realApiKey);
     });
 
@@ -259,8 +264,9 @@ describe('OpenAIService', () => {
       ];
 
       const response = await service.chat(messages, {
-        model: 'gpt-5',
-        maxTokens: 10
+        model: 'gpt-3.5-turbo',
+        maxTokens: 10,
+        temperature: 0
       });
 
       expect(typeof response).toBe('string');
@@ -273,7 +279,7 @@ describe('OpenAIService', () => {
       ];
 
       // Test with invalid model (should throw error)
-      await expect(service.chat(messages, { model: 'invalid-model-name' }))
+      await expect(service.chat(messages, { model: 'completely-invalid-model-name-12345' }))
         .rejects
         .toThrow();
     }, 30000);

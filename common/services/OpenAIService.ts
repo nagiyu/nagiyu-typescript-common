@@ -36,11 +36,11 @@ export default class OpenAIService implements OpenAIServiceType {
           role: msg.role,
           content: msg.content,
         })),
-        max_completion_tokens: options?.maxTokens,
+        max_tokens: options?.maxTokens,
         temperature: options?.temperature,
       });
 
-      const response = completion.choices[0]?.message?.content;
+      const response = completion.choices?.[0]?.message?.content;
 
       if (!response) {
         ErrorUtil.throwError('No response received from OpenAI API');
@@ -48,7 +48,15 @@ export default class OpenAIService implements OpenAIServiceType {
 
       return response;
     } catch (error) {
+      // Handle different types of errors more specifically
       if (error instanceof Error) {
+        // Check if it's an OpenAI API error with more specific information
+        if ('error' in error && typeof error.error === 'object' && error.error !== null) {
+          const apiError = error.error as any;
+          if (apiError.message) {
+            ErrorUtil.throwError(`OpenAI API error: ${apiError.message}`);
+          }
+        }
         ErrorUtil.throwError(`OpenAI API error: ${error.message}`);
       } else {
         ErrorUtil.throwError('Unknown error occurred while calling OpenAI API');
