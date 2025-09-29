@@ -259,9 +259,8 @@ describe('OpenAIService', () => {
       ];
 
       const response = await service.chat(messages, {
-        model: 'gpt-3.5-turbo',
-        maxTokens: 10,
-        temperature: 0
+        model: 'gpt-5',
+        maxTokens: 10
       });
 
       expect(typeof response).toBe('string');

@@ -36,12 +36,12 @@ export default class OpenAIService implements OpenAIServiceType {
           role: msg.role,
           content: msg.content,
         })),
-        max_tokens: options?.maxTokens,
+        max_completion_tokens: options?.maxTokens,
         temperature: options?.temperature,
       });
 
       const response = completion.choices[0]?.message?.content;
-      
+
       if (!response) {
         ErrorUtil.throwError('No response received from OpenAI API');
       }
