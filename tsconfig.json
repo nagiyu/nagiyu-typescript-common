@@ -1,10 +1,18 @@
 {
   "compilerOptions": {
+    "target": "ES2018",
+    "module": "commonjs",
+    "lib": ["ES2018"],
     "paths": {
       "@common/*": [
-        "./*"
+        "./common/*"
+      ],
+      "@common-mock/*": [
+        "./tests/mock/*"
       ]
     },
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true
   }
 }
