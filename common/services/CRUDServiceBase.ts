@@ -5,7 +5,7 @@ import { DataTypeBase } from '@common/interfaces/data/DataTypeBase';
 import { RecordTypeBase } from '@common/interfaces/record/RecordTypeBase';
 
 export default abstract class CRUDServiceBase<DataType extends DataTypeBase, RecordType extends RecordTypeBase> {
-  private readonly dataAccessor: DataAccessorBase<RecordType>;
+  protected readonly dataAccessor: DataAccessorBase<RecordType>;
   private readonly useCache: boolean;
   private readonly cacheKey: string;
 
