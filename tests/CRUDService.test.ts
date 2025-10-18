@@ -91,13 +91,50 @@ class TestCRUDNoCacheService extends CRUDServiceBase<TestDataType, TestRecordTyp
   }
 }
 
+class TestCRUDServiceWithDataAccessor extends CRUDServiceBase<TestDataType, TestRecordType> {
+  constructor() {
+    super(new TestDataAccessor());
+  }
+
+  protected dataToRecord(data: Partial<TestDataType>): Partial<TestRecordType> {
+    return {
+      ColumnA: data.columnA,
+      ColumnB: data.columnB,
+      ColumnC: data.columnC,
+      ColumnD: data.columnD,
+    };
+  }
+
+  protected recordToData(record: TestRecordType): TestDataType {
+    return {
+      id: record.ID,
+      columnA: record.ColumnA,
+      columnB: record.ColumnB,
+      columnC: record.ColumnC,
+      columnD: record.ColumnD,
+      create: record.Create,
+      update: record.Update,
+    };
+  }
+
+  public getTableName(): string {
+    return this.dataAccessor.getTableName();
+  }
+
+  public getDataType(): string {
+    return this.dataAccessor.getDataType();
+  }
+}
+
 describe('CRUDServiceBase', () => {
   let service: TestCRUDService;
   let serviceNoCache: TestCRUDNoCacheService;
+  let serviceWithDataAccessor: TestCRUDServiceWithDataAccessor;
 
   beforeEach(() => {
     service = new TestCRUDService();
     serviceNoCache = new TestCRUDNoCacheService();
+    serviceWithDataAccessor = new TestCRUDServiceWithDataAccessor();
   });
 
   it('Get', async () => {
@@ -212,5 +249,13 @@ describe('CRUDServiceBase', () => {
     const deleteResult = await serviceNoCache.getById(id);
 
     expect(deleteResult).toBeNull();
+  });
+
+  it('Access dataAccessor from derived class', () => {
+    const tableName = serviceWithDataAccessor.getTableName();
+    const dataType = serviceWithDataAccessor.getDataType();
+
+    expect(tableName).toBe('Test');
+    expect(dataType).toBe('TypeC');
   });
 });
