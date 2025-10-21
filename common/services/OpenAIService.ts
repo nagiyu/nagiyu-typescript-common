@@ -31,15 +31,8 @@ export default class OpenAIService implements OpenAIServiceType {
     }
 
     try {
-      const completion = await this.openaiClient.chat.completions.create({
-        model: options?.model || OPENAI_MODEL.GPT_4_1,
-        messages: messages.map(msg => ({
-          role: msg.role,
-          content: msg.content,
-        })),
-        max_completion_tokens: options?.maxTokens,
-        temperature: options?.temperature,
-      });
+      const completionParams = this.prepareCompletionParams(messages, options);
+      const completion = await this.openaiClient.chat.completions.create(completionParams);
 
       const response = completion.choices?.[0]?.message?.content;
 
@@ -63,6 +56,37 @@ export default class OpenAIService implements OpenAIServiceType {
         ErrorUtil.throwError('Unknown error occurred while calling OpenAI API');
       }
     }
+  }
+
+  /**
+   * Prepares completion parameters with model-specific adjustments.
+   * @private
+   */
+  private prepareCompletionParams(messages: OpenAIChatHistory, options?: OpenAIChatOptions) {
+    const model = options?.model || OPENAI_MODEL.GPT_4_1;
+
+    const baseParams = {
+      model,
+      messages: messages.map(msg => ({
+        role: msg.role,
+        content: msg.content,
+      })),
+      max_completion_tokens: options?.maxTokens,
+      temperature: options?.temperature,
+    };
+
+    // Handle GPT-5 specific parameters if needed
+    if (model === OPENAI_MODEL.GPT_5) {
+      return {
+        model,
+        messages: messages.map(msg => ({
+          role: msg.role,
+          content: msg.content,
+        })),
+      };
+    }
+
+    return baseParams;
   }
 
   /**

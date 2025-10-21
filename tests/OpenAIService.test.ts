@@ -75,6 +75,16 @@ describe('OpenAIService', () => {
       expect(response).toBe('This is a mock response from OpenAI. (using gpt-4.1)');
     });
 
+    it('should support GPT-5 model', async () => {
+      const messages: OpenAIChatHistory = [
+        { role: OPENAI_MESSAGE_ROLES.USER, content: 'Random question' },
+      ];
+
+      const response = await mockService.chat(messages, { model: OPENAI_MODEL.GPT_5 });
+
+      expect(response).toBe('This is a mock response from OpenAI. (using gpt-5)');
+    });
+
     it('should allow custom default response', async () => {
       mockService.setDefaultResponse('Custom mock response');
 
@@ -272,6 +282,23 @@ describe('OpenAIService', () => {
       });
 
       console.log('OpenAI API response:', response);
+
+      expect(typeof response).toBe('string');
+      expect(response.length).toBeGreaterThan(0);
+    }, 30000);
+
+    it('should handle GPT-5 model with real API', async () => {
+      const messages: OpenAIChatHistory = [
+        { role: OPENAI_MESSAGE_ROLES.USER, content: 'Say "test" and nothing else.' },
+      ];
+
+      const response = await service.chat(messages, {
+        model: OPENAI_MODEL.GPT_5,
+        maxTokens: 10,
+        temperature: 0
+      });
+
+      console.log('OpenAI API GPT-5 response:', response);
 
       expect(typeof response).toBe('string');
       expect(response.length).toBeGreaterThan(0);
