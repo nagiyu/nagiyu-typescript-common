@@ -64,7 +64,7 @@ export default class OpenAIService implements OpenAIServiceType {
    */
   private prepareCompletionParams(messages: OpenAIChatHistory, options?: OpenAIChatOptions) {
     const model = options?.model || OPENAI_MODEL.GPT_4_1;
-    
+
     const baseParams = {
       model,
       messages: messages.map(msg => ({
@@ -77,10 +77,13 @@ export default class OpenAIService implements OpenAIServiceType {
 
     // Handle GPT-5 specific parameters if needed
     if (model === OPENAI_MODEL.GPT_5) {
-      // GPT-5 may have specific parameter requirements or limitations
-      // Currently, we use the same parameters as other models
-      // This can be extended in the future if GPT-5 requires special handling
-      return baseParams;
+      return {
+        model,
+        messages: messages.map(msg => ({
+          role: msg.role,
+          content: msg.content,
+        })),
+      };
     }
 
     return baseParams;
