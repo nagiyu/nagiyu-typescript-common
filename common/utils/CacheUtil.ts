@@ -26,6 +26,11 @@ export default class CacheUtil {
   }
 
   public static set(key: string, value: any, ttl?: number): void {
+    // TTLが0の場合は即座に期限切れとなるため、保存しない
+    if (ttl === 0) {
+      return;
+    }
+    
     this.cache[key] = { 
       value, 
       timestamp: Date.now(),

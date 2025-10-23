@@ -69,6 +69,11 @@ export abstract class AuthorizationServiceBase<Feature extends string = string> 
     const userLevelIndex = AuthorizationServiceBase.LEVEL_HIERARCHY.indexOf(userLevel);
     const requiredLevelIndex = AuthorizationServiceBase.LEVEL_HIERARCHY.indexOf(requiredLevel);
 
+    // 不明な権限レベルが指定された場合は、安全のためfalseを返す
+    if (userLevelIndex === -1 || requiredLevelIndex === -1) {
+      return false;
+    }
+
     return userLevelIndex >= requiredLevelIndex;
   }
 

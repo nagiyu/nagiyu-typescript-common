@@ -449,5 +449,11 @@ describe('AuthorizationServiceBase', () => {
       );
       expect(result).toBe(true);
     });
+
+    it('should return false for invalid permission levels', () => {
+      const invalidLevel = 'invalid_level' as PermissionLevel;
+      expect(service.testComparePermissionLevel(PermissionLevel.ADMIN, invalidLevel)).toBe(false);
+      expect(service.testComparePermissionLevel(invalidLevel, PermissionLevel.VIEW)).toBe(false);
+    });
   });
 });
