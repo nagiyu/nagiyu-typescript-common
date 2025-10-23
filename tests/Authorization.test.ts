@@ -2,7 +2,6 @@ import { AuthorizationServiceBase } from '@common/services/authorization/Authori
 import { PermissionLevel } from '@common/enums/PermissionLevel';
 import { UserType } from '@common/enums/UserType';
 import { PermissionMatrix } from '@common/interfaces/authorization/PermissionMatrix';
-import CacheUtil from '@common/utils/CacheUtil';
 
 // テスト用の機能定義
 enum TestFeature {
@@ -58,17 +57,6 @@ class TestAuthorizationService extends AuthorizationServiceBase<TestFeature> {
     return this.currentUserId;
   }
 
-  protected async loadUserPermissions(userId: string): Promise<Map<TestFeature, PermissionLevel>> {
-    const permissions = new Map<TestFeature, PermissionLevel>();
-    const userType = await this.getUserType();
-    
-    Object.values(TestFeature).forEach(feature => {
-      permissions.set(feature, testPermissionMatrix[feature][userType]);
-    });
-
-    return permissions;
-  }
-
   protected async getCustomPermission(
     userId: string,
     feature: TestFeature
@@ -100,14 +88,6 @@ class TestAuthorizationService extends AuthorizationServiceBase<TestFeature> {
     this.customPermissions.clear();
   }
 
-  public testClearCache(userId?: string): void {
-    this.clearCache(userId);
-  }
-
-  public async testGetUserPermissions(userId: string): Promise<Map<TestFeature, PermissionLevel>> {
-    return this.getUserPermissions(userId);
-  }
-
   public testComparePermissionLevel(userLevel: PermissionLevel, requiredLevel: PermissionLevel): boolean {
     return this.comparePermissionLevel(userLevel, requiredLevel);
   }
@@ -119,8 +99,6 @@ describe('AuthorizationServiceBase', () => {
   beforeEach(() => {
     service = new TestAuthorizationService();
     service.clearCustomPermissions();
-    // キャッシュをクリア
-    CacheUtil.clearByPrefix('user_permissions_');
   });
 
   describe('comparePermissionLevel', () => {
@@ -387,47 +365,6 @@ describe('AuthorizationServiceBase', () => {
         PermissionLevel.ADMIN
       );
       expect(result).toBe(true);
-    });
-  });
-
-  describe('Cache functionality', () => {
-    it('should cache user permissions', async () => {
-      const userId = 'user123';
-      service.setUserType(UserType.AUTHENTICATED);
-
-      // 初回呼び出し
-      const permissions1 = await service.testGetUserPermissions(userId);
-      
-      // キャッシュから取得
-      const permissions2 = await service.testGetUserPermissions(userId);
-
-      expect(permissions1).toEqual(permissions2);
-    });
-
-    it('should clear cache for specific user', async () => {
-      const userId = 'user123';
-      service.setUserType(UserType.AUTHENTICATED);
-
-      await service.testGetUserPermissions(userId);
-      
-      service.testClearCache(userId);
-
-      const cached = CacheUtil.get(`user_permissions_${userId}`);
-      expect(cached).toBeNull();
-    });
-
-    it('should clear cache for all users', async () => {
-      service.setUserType(UserType.AUTHENTICATED);
-      
-      await service.testGetUserPermissions('user1');
-      await service.testGetUserPermissions('user2');
-      await service.testGetUserPermissions('user3');
-
-      service.testClearCache();
-
-      expect(CacheUtil.get('user_permissions_user1')).toBeNull();
-      expect(CacheUtil.get('user_permissions_user2')).toBeNull();
-      expect(CacheUtil.get('user_permissions_user3')).toBeNull();
     });
   });
 

@@ -1,5 +1,6 @@
 import { PermissionLevel } from '@common/enums/PermissionLevel';
 import { UserType } from '@common/enums/UserType';
+import { RecordTypeBase } from '@common/interfaces/record/RecordTypeBase';
 
 /**
  * 権限マトリックスの型定義
@@ -19,15 +20,9 @@ export type PermissionMatrix<Feature extends string = string> = {
  * 
  * @template Feature アプリケーション固有の機能の型（プロジェクトごとに定義）
  */
-export interface PermissionMatrixRecord<Feature extends string = string> {
-  /** レコードID */
-  Id: string;
-  /** データタイプ */
-  DataType: string;
+export interface PermissionMatrixRecord<Feature extends string = string> extends RecordTypeBase {
+  /** データタイプ（固定値） */
+  DataType: 'PermissionMatrix';
   /** 権限マトリックスデータ */
   Matrix: PermissionMatrix<Feature>;
-  /** 作成日時（Unix timestamp） */
-  Create: number;
-  /** 更新日時（Unix timestamp） */
-  Update: number;
 }

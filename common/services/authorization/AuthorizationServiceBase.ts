@@ -1,4 +1,3 @@
-import CacheUtil from '@common/utils/CacheUtil';
 import { PermissionLevel } from '@common/enums/PermissionLevel';
 import { UserType } from '@common/enums/UserType';
 import { PermissionMatrix } from '@common/interfaces/authorization/PermissionMatrix';
@@ -11,9 +10,6 @@ import { PermissionMatrix } from '@common/interfaces/authorization/PermissionMat
  * @template Feature アプリケーション固有の機能の型（プロジェクトごとに定義）
  */
 export abstract class AuthorizationServiceBase<Feature extends string = string> {
-  private static readonly CACHE_PREFIX = 'user_permissions_';
-  private static readonly CACHE_TTL = 300; // 5分（秒単位）
-
   /**
    * 権限レベルの階層定義
    * 上位の権限は下位の権限をすべて含みます
@@ -94,43 +90,6 @@ export abstract class AuthorizationServiceBase<Feature extends string = string> 
   }
 
   /**
-   * ユーザーの権限をキャッシュから取得または読み込み
-   * 
-   * @param userId ユーザーID
-   * @returns ユーザーの機能ごとの権限マップ
-   */
-  protected async getUserPermissions(userId: string): Promise<Map<Feature, PermissionLevel>> {
-    const cacheKey = `${AuthorizationServiceBase.CACHE_PREFIX}${userId}`;
-    
-    // キャッシュチェック
-    const cached = CacheUtil.get<Map<Feature, PermissionLevel>>(cacheKey);
-    if (cached) {
-      return cached;
-    }
-
-    // 権限を取得してキャッシュ
-    const permissions = await this.loadUserPermissions(userId);
-    CacheUtil.set(cacheKey, permissions, AuthorizationServiceBase.CACHE_TTL);
-
-    return permissions;
-  }
-
-  /**
-   * キャッシュをクリア
-   * 
-   * @param userId ユーザーID（指定した場合は特定ユーザーのみ、未指定の場合は全ユーザー）
-   */
-  protected clearCache(userId?: string): void {
-    if (userId) {
-      const cacheKey = `${AuthorizationServiceBase.CACHE_PREFIX}${userId}`;
-      CacheUtil.delete(cacheKey);
-    } else {
-      // 全ユーザーのキャッシュをクリア
-      CacheUtil.clearByPrefix(AuthorizationServiceBase.CACHE_PREFIX);
-    }
-  }
-
-  /**
    * 権限マトリックスを取得（派生クラスで実装）
    * データベースや設定ファイルから権限マトリックスを取得する実装を提供してください。
    * 
@@ -154,15 +113,6 @@ export abstract class AuthorizationServiceBase<Feature extends string = string> 
    * @returns ユーザーID（ログインしていない場合はundefined）
    */
   protected abstract getUserId(): Promise<string | undefined>;
-
-  /**
-   * ユーザーの権限を読み込む（派生クラスで実装）
-   * データベースから特定ユーザーの権限情報を取得する実装を提供してください。
-   * 
-   * @param userId ユーザーID
-   * @returns ユーザーの機能ごとの権限マップ
-   */
-  protected abstract loadUserPermissions(userId: string): Promise<Map<Feature, PermissionLevel>>;
 
   /**
    * ユーザー固有のカスタム権限を取得（派生クラスでオプション実装）
