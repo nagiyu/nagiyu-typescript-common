@@ -1,6 +1,7 @@
 interface CacheType {
   value: any;
   timestamp: number;
+  ttl?: number;
 }
 
 export default class CacheUtil {
@@ -11,18 +12,45 @@ export default class CacheUtil {
   public static get<T>(key: string): T | null {
     const cacheData = this.cache[key];
 
-    if (cacheData && (Date.now() - cacheData.timestamp < this.CACHE_TTL)) {
+    if (!cacheData) {
+      return null;
+    }
+
+    const ttl = cacheData.ttl !== undefined ? cacheData.ttl * 1000 : this.CACHE_TTL;
+    if (Date.now() - cacheData.timestamp < ttl) {
       return cacheData.value as T;
     }
 
+    delete this.cache[key];
     return null;
   }
 
-  public static set(key: string, value: any): void {
-    this.cache[key] = { value, timestamp: Date.now() };
+  public static set(key: string, value: any, ttl?: number): void {
+    // TTLが0の場合は即座に期限切れとなるため、保存しない
+    if (ttl === 0) {
+      return;
+    }
+    
+    this.cache[key] = { 
+      value, 
+      timestamp: Date.now(),
+      ...(ttl !== undefined && { ttl })
+    };
   }
 
   public static clear(key: string): void {
     delete this.cache[key];
+  }
+
+  public static delete(key: string): void {
+    delete this.cache[key];
+  }
+
+  public static clearByPrefix(prefix: string): void {
+    Object.keys(this.cache).forEach(key => {
+      if (key.startsWith(prefix)) {
+        delete this.cache[key];
+      }
+    });
   }
 }
