@@ -1,6 +1,7 @@
+import { BadRequestError } from '@common/errors';
 import { PermissionLevel } from '@common/enums/PermissionLevel';
-import { UserType } from '@common/enums/UserType';
 import { PermissionMatrix } from '@common/interfaces/authorization/PermissionMatrix';
+import { UserType } from '@common/enums/UserType';
 
 /**
  * 汎用認可サービス基底クラス
@@ -128,5 +129,17 @@ export abstract class AuthorizationServiceBase<Feature extends string = string> 
   ): Promise<PermissionLevel | null> {
     // デフォルト実装：カスタム権限なし
     return null;
+  }
+
+  /**
+   * 入力の検証
+   * 派生先で override し、Feature の検証も行ってください
+   * @param feature 機能
+   * @param level 権限レベル
+   */
+  public validate(feature: Feature, level: PermissionLevel): void {
+    if (!level || !Object.values(PermissionLevel).includes(level as PermissionLevel)) {
+      throw new BadRequestError('Invalid permission level');
+    }
   }
 }
