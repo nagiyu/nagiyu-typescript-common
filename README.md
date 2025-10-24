@@ -30,3 +30,23 @@ npm test
 - `common/`: 共通ライブラリのソースコード
 - `tests/`: テストファイル
 - `docs/`: プロジェクトドキュメント
+
+## 主要機能
+
+### 認可システム (Authorization)
+
+機能ベースの柔軟な認可アーキテクチャを提供します。詳細については [認可アーキテクチャ設計](./docs/AuthorizationArchitecture.md) を参照してください。
+
+主要コンポーネント:
+- `AuthorizationServiceBase`: 認可ロジックの基底クラス
+- `PermissionLevel`: 権限レベルの定義（NONE, VIEW, EDIT, DELETE, ADMIN）
+- `UserType`: ユーザータイプの定義（GUEST, AUTHENTICATED, PREMIUM, ADMIN）
+- `PermissionMatrix`: 機能とユーザータイプの権限マトリックス
+
+### CRUDサービス
+
+データアクセスとビジネスロジックを統合したCRUDサービスの基底クラスを提供します。詳細については [CRUDServiceBase](./docs/CRUDServiceBase.md) を参照してください。
+
+### OpenAIサービス
+
+OpenAI APIとの連携を簡素化するサービスを提供します。詳細については [OpenAIService](./docs/OpenAIService.md) を参照してください。

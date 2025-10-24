@@ -1,6 +1,13 @@
 {
   "name": "Nagiyu TypeScript Common",
   "image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
+  "containerEnv": {
+    "PROCESS_ENV": "local",
+    "PROJECT_SECRET": "",
+    "PROJECT_AWS_ACCESS_KEY": "",
+    "PROJECT_AWS_SECRET_ACCESS_KEY": "",
+    "PROJECT_AWS_REGION": ""
+  },
   "customizations": {
     "vscode": {
       "extensions": [
