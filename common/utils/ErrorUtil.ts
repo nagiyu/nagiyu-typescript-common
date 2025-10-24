@@ -1,3 +1,14 @@
+import CloudWatchLogService, { LogEvent } from '@common/services/aws/CloudWatchLogsService';
+import EnvironmentalUtil from '@common/utils/EnvironmentalUtil';
+import { DataTypeBase } from '@common/interfaces/data/DataTypeBase';
+
+interface ErrorNotificationDataType extends DataTypeBase {
+  rootFeature: string;
+  feature: string;
+  message: string;
+  stack: string;
+}
+
 /**
  * Utility for handling errors in the application.
  */
@@ -7,6 +18,7 @@ export default class ErrorUtil {
    * @param message The error message to throw.
    * @param error The error details to include.
    * @throws Throws an Error with the specified message and error details.
+   * @deprecated 今後は通常の Error をスローしてください。
    */
   public static throwError(message?: string | null, error?: any | null): never {
     if (!message && !error) {
@@ -29,5 +41,39 @@ export default class ErrorUtil {
     const combinedMessage = `${message}: ${error instanceof Error ? error.message : String(error)}`;
     console.error(combinedMessage);
     throw new Error(combinedMessage);
+  }
+
+  /**
+   * Logs an error to CloudWatch Logs.
+   * @param rootFeature Root feature name
+   * @param feature Feature name
+   * @param error The error to log
+   */
+  public static async logError<T extends Error = Error>(
+    rootFeature: string,
+    feature: string,
+    error: T
+  ): Promise<void> {
+    const environment = EnvironmentalUtil.GetProcessEnv();
+
+    const logService = new CloudWatchLogService(`/nagiyu/${rootFeature}/${environment}`, feature);
+
+    const errorData: Partial<ErrorNotificationDataType> = {
+      rootFeature: rootFeature,
+      feature: feature,
+      message: error.message,
+      stack: error.stack || '',
+    };
+
+    await logService.createLogStream();
+
+    const events: LogEvent[] = [
+      {
+        message: JSON.stringify(errorData),
+        timestamp: Date.now(),
+      }
+    ];
+
+    await logService.putLogEvents(events);
   }
 }
