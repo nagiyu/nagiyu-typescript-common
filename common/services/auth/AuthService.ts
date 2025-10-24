@@ -3,6 +3,9 @@ import CRUDServiceBase from '@common/services/CRUDServiceBase.old';
 import { AuthDataType } from '@common/interfaces/data/AuthDataType';
 import { AuthRecordType } from '@common/interfaces/record/AuthRecordType';
 
+/**
+ * @deprecated Use the new Service pattern instead.
+ */
 export default class AuthService<DataType extends AuthDataType, RecordType extends AuthRecordType> extends CRUDServiceBase<DataType, RecordType> {
   public constructor(dataToRecord: (data: DataType) => RecordType, recordToData: (record: RecordType) => DataType) {
     super(new AuthDataAccessor(), dataToRecord, recordToData);
