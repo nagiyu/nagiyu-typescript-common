@@ -1,4 +1,4 @@
-import { OpenAIMessageRole, OpenAIModel } from '@common/consts/OpenAIConst';
+import { OpenAIMessageRole, OpenAIModel, OpenAIToolName } from '@common/consts/OpenAIConst';
 
 /**
  * Represents a single message in an OpenAI chat conversation.
@@ -25,4 +25,6 @@ export interface OpenAIChatOptions {
   maxTokens?: number;
   /** Temperature for response randomness */
   temperature?: number;
+
+  tools?: OpenAIToolName[];
 }
