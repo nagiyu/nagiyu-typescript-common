@@ -1,7 +1,9 @@
 import OpenAIService from '@common/services/OpenAIService';
-import OpenAIServiceMock from '@common-mock/services/OpenAIServiceMock';
+import SecretsManagerUtil from '@common/aws/SecretsManagerUtil';
 import { OpenAIChatHistory, OpenAIMessageType } from '@common/interfaces/OpenAIMessageType';
-import { OPENAI_MESSAGE_ROLES, OPENAI_MODEL } from '@common/consts/OpenAIConst';
+import { OPENAI_MESSAGE_ROLES, OPENAI_MODEL, OpenAIToolName } from '@common/consts/OpenAIConst';
+
+import OpenAIServiceMock from '@common-mock/services/OpenAIServiceMock';
 
 describe('OpenAIService', () => {
   let mockService: OpenAIServiceMock;
@@ -217,7 +219,11 @@ describe('OpenAIService', () => {
   // To run these tests, remove the .skip and provide a real API key
   describe.skip('Real OpenAI API Tests', () => {
     let service: OpenAIService;
-    const realApiKey = process.env.OPENAI_API_KEY || 'your-real-api-key-here';
+    let realApiKey: string;
+
+    beforeAll(async () => {
+      realApiKey = await SecretsManagerUtil.getSecretValue('OpenAI', 'COMMON');
+    });
 
     beforeEach(() => {
       service = new OpenAIService(realApiKey);
@@ -294,8 +300,23 @@ describe('OpenAIService', () => {
 
       const response = await service.chat(messages, {
         model: OPENAI_MODEL.GPT_5,
-        maxTokens: 10,
-        temperature: 0
+      });
+
+      console.log('OpenAI API GPT-5 response:', response);
+
+      expect(typeof response).toBe('string');
+      expect(response.length).toBeGreaterThan(0);
+    }, 30000);
+
+    it('test Web Search Tool integration with real API', async () => {
+      const messages: OpenAIChatHistory = [
+        { role: OPENAI_MESSAGE_ROLES.SYSTEM, content: 'You have access to a web search tool.' },
+        { role: OPENAI_MESSAGE_ROLES.USER, content: 'What is the latest version of Node.js?' },
+      ];
+
+      const response = await service.chat(messages, {
+        model: OPENAI_MODEL.GPT_5,
+        tools: [OpenAIToolName.WEB_SEARCH],
       });
 
       console.log('OpenAI API GPT-5 response:', response);

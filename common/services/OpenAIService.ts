@@ -1,8 +1,9 @@
 import OpenAI from 'openai';
+import { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/chat';
 
-import ErrorUtil from '@common/utils/ErrorUtil';
+import { BadRequestError } from '@common/errors';
 import { OpenAIChatHistory, OpenAIChatOptions } from '@common/interfaces/OpenAIMessageType';
-import { OPENAI_MODEL } from '@common/consts/OpenAIConst';
+import { OPENAI_MODEL, OpenAIToolName } from '@common/consts/OpenAIConst';
 
 export interface OpenAIServiceType {
   chat(messages: OpenAIChatHistory, options?: OpenAIChatOptions): Promise<string>;
@@ -27,7 +28,7 @@ export default class OpenAIService implements OpenAIServiceType {
    */
   public async chat(messages: OpenAIChatHistory, options?: OpenAIChatOptions): Promise<string> {
     if (!messages || messages.length === 0) {
-      ErrorUtil.throwError('Messages array cannot be empty');
+      throw new BadRequestError('Messages array cannot be empty');
     }
 
     try {
@@ -37,7 +38,7 @@ export default class OpenAIService implements OpenAIServiceType {
       const response = completion.choices?.[0]?.message?.content;
 
       if (!response) {
-        ErrorUtil.throwError('No response received from OpenAI API');
+        throw new Error('No response received from OpenAI API');
       }
 
       return response;
@@ -48,12 +49,12 @@ export default class OpenAIService implements OpenAIServiceType {
         if ('error' in error && typeof error.error === 'object' && error.error !== null) {
           const apiError = error.error as any;
           if (apiError.message) {
-            ErrorUtil.throwError(`OpenAI API error: ${apiError.message}`);
+            throw new Error(`OpenAI API error: ${apiError.message}`);
           }
         }
-        ErrorUtil.throwError(`OpenAI API error: ${error.message}`);
+        throw new Error(`OpenAI API error: ${error.message}`);
       } else {
-        ErrorUtil.throwError('Unknown error occurred while calling OpenAI API');
+        throw new Error('Unknown error occurred while calling OpenAI API');
       }
     }
   }
@@ -62,8 +63,8 @@ export default class OpenAIService implements OpenAIServiceType {
    * Prepares completion parameters with model-specific adjustments.
    * @private
    */
-  private prepareCompletionParams(messages: OpenAIChatHistory, options?: OpenAIChatOptions) {
-    const model = options?.model || OPENAI_MODEL.GPT_4_1;
+  private prepareCompletionParams(messages: OpenAIChatHistory, options?: OpenAIChatOptions): ChatCompletionCreateParamsNonStreaming {
+    const model: string = options?.model || OPENAI_MODEL.GPT_4_1;
 
     const baseParams = {
       model,
@@ -77,12 +78,23 @@ export default class OpenAIService implements OpenAIServiceType {
 
     // Handle GPT-5 specific parameters if needed
     if (model === OPENAI_MODEL.GPT_5) {
+      if (Array.isArray(options?.tools) && options.tools.includes(OpenAIToolName.WEB_SEARCH)) {
+        return {
+          model: 'gpt-5-search-api',
+          messages: messages.map(msg => ({
+            role: msg.role,
+            content: msg.content,
+          })),
+        };
+      }
+
       return {
         model,
         messages: messages.map(msg => ({
           role: msg.role,
           content: msg.content,
         })),
+        reasoning_effort: 'low',
       };
     }
 
