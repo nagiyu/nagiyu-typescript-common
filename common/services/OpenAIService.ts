@@ -3,7 +3,7 @@ import { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/chat';
 
 import { BadRequestError } from '@common/errors';
 import { OpenAIChatHistory, OpenAIChatOptions } from '@common/interfaces/OpenAIMessageType';
-import { OPENAI_MODEL, OPENAI_TOOL_DEFINITIONS } from '@common/consts/OpenAIConst';
+import { OPENAI_MODEL, OpenAIToolName } from '@common/consts/OpenAIConst';
 
 export interface OpenAIServiceType {
   chat(messages: OpenAIChatHistory, options?: OpenAIChatOptions): Promise<string>;
@@ -64,8 +64,7 @@ export default class OpenAIService implements OpenAIServiceType {
    * @private
    */
   private prepareCompletionParams(messages: OpenAIChatHistory, options?: OpenAIChatOptions): ChatCompletionCreateParamsNonStreaming {
-    const model = options?.model || OPENAI_MODEL.GPT_4_1;
-    const tools = (options?.tools ?? []).map(name => OPENAI_TOOL_DEFINITIONS[name]);
+    const model: string = options?.model || OPENAI_MODEL.GPT_4_1;
 
     const baseParams = {
       model,
@@ -75,18 +74,27 @@ export default class OpenAIService implements OpenAIServiceType {
       })),
       max_completion_tokens: options?.maxTokens,
       temperature: options?.temperature,
-      tools
     };
 
     // Handle GPT-5 specific parameters if needed
     if (model === OPENAI_MODEL.GPT_5) {
+      if (Array.isArray(options?.tools) && options.tools.includes(OpenAIToolName.WEB_SEARCH)) {
+        return {
+          model: 'gpt-5-search-api',
+          messages: messages.map(msg => ({
+            role: msg.role,
+            content: msg.content,
+          })),
+        };
+      }
+
       return {
         model,
         messages: messages.map(msg => ({
           role: msg.role,
           content: msg.content,
         })),
-        tools
+        reasoning_effort: 'low',
       };
     }
 
