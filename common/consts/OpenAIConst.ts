@@ -1,3 +1,5 @@
+import { ChatCompletionTool } from 'openai/resources/chat';
+
 /**
  * OpenAI message roles constants
  */
@@ -19,3 +21,17 @@ export const OPENAI_MODEL = {
 } as const;
 
 export type OpenAIModel = typeof OPENAI_MODEL[keyof typeof OPENAI_MODEL];
+
+export enum OpenAIToolName {
+  WEB_SEARCH = 'web_search'
+}
+
+export const OPENAI_TOOL_DEFINITIONS: Record<OpenAIToolName, ChatCompletionTool> = {
+  [OpenAIToolName.WEB_SEARCH]: {
+    type: 'function',
+    function: {
+      name: 'web_search',
+      description: 'Web検索を行う'
+    }
+  },
+};
