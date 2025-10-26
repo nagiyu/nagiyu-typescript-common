@@ -3,6 +3,7 @@ import DataAccessorBase from '@common/services/DataAccessorBase';
 import DynamoDBServiceMock from '@common-mock/services/aws/DynamoDBServiceMock';
 import ErrorUtil from '@common/utils/ErrorUtil';
 import { DataTypeBase } from '@common/interfaces/data/DataTypeBase';
+import { NotFoundError } from '@common/errors';
 import { RecordTypeBase } from '@common/interfaces/record/RecordTypeBase';
 
 const tableName = 'Test';
@@ -198,9 +199,7 @@ describe('CRUDServiceBase', () => {
 
     await service.delete(id);
 
-    const deleteResult = await service.getById(id);
-
-    expect(deleteResult).toBeNull();
+    await expect(service.getById(id)).rejects.toThrow(NotFoundError);
   });
 
   it('CRUD No Cache', async () => {
@@ -246,9 +245,7 @@ describe('CRUDServiceBase', () => {
 
     await serviceNoCache.delete(id);
 
-    const deleteResult = await serviceNoCache.getById(id);
-
-    expect(deleteResult).toBeNull();
+    await expect(service.getById(id)).rejects.toThrow(NotFoundError);
   });
 
   it('Access dataAccessor from derived class', () => {
