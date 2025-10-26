@@ -1,8 +1,8 @@
 import CacheUtil from '@common/utils/CacheUtil';
 import DataAccessorBase from '@common/services/DataAccessorBase';
-import ErrorUtil from '@common/utils/ErrorUtil';
 import { DataTypeBase } from '@common/interfaces/data/DataTypeBase';
 import { RecordTypeBase } from '@common/interfaces/record/RecordTypeBase';
+import { NotFoundError } from '@common/errors';
 
 export default abstract class CRUDServiceBase<DataType extends DataTypeBase, RecordType extends RecordTypeBase> {
   protected readonly dataAccessor: DataAccessorBase<RecordType>;
@@ -32,13 +32,18 @@ export default abstract class CRUDServiceBase<DataType extends DataTypeBase, Rec
     if (this.useCache) {
       const cachedData = await this.getCache();
       const item = cachedData.find(i => i.id === id);
-      return item || null;
+
+      if (!item) {
+        throw new NotFoundError(`Item not found with id: ${id}`);
+      }
+
+      return item;
     }
 
     const data = await this.dataAccessor.getById(id);
 
     if (!data) {
-      return null;
+      throw new NotFoundError(`Item not found with id: ${id}`);
     }
 
     return this.recordToData(data);
@@ -61,7 +66,7 @@ export default abstract class CRUDServiceBase<DataType extends DataTypeBase, Rec
     const data = await this.dataAccessor.update(id, this.dataToRecord(updates));
 
     if (!data) {
-      ErrorUtil.throwError(`Failed to update item with id: ${id}`);
+      throw new Error(`Failed to update item with id: ${id}`);
     }
 
     const item = this.recordToData(data);
