@@ -1,4 +1,5 @@
 import CRUDServiceBase from '@common/services/CRUDServiceBase';
+import { NotFoundError } from '@common/errors';
 import { SubscriptionDataAccessor } from '@common/services/subscription/SubscriptionDataAccessor';
 import { SubscriptionDataType } from '@common/interfaces/data/SubscriptionDataType';
 import { SubscriptionRecordType } from '@common/interfaces/record/SubscriptionRecordType';
@@ -9,7 +10,7 @@ export class SubscriptionService extends CRUDServiceBase<SubscriptionDataType, S
       dataAccessor = new SubscriptionDataAccessor();
     }
 
-    super(dataAccessor, true);
+    super(dataAccessor, false);
   }
 
   public async getByTerminalId(terminalId: string): Promise<SubscriptionDataType> {
@@ -17,7 +18,7 @@ export class SubscriptionService extends CRUDServiceBase<SubscriptionDataType, S
     const record = records.find((rec) => rec.TerminalID === terminalId);
 
     if (!record) {
-      throw new Error(`Subscription record not found for TerminalID: ${terminalId}`);
+      throw new NotFoundError(`Subscription record not found for TerminalID: ${terminalId}`);
     }
 
     return this.recordToData(record);

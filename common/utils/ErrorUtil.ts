@@ -44,6 +44,11 @@ export default class ErrorUtil {
   }
 
   /**
+   * 最大リトライ回数
+   */
+  private static readonly maxRetries = 5;
+
+  /**
    * Logs an error to CloudWatch Logs.
    * @param rootFeature Root feature name
    * @param feature Feature name
@@ -74,6 +79,20 @@ export default class ErrorUtil {
       }
     ];
 
-    await logService.putLogEvents(events);
+    let attempt = 0;
+
+    while (attempt < this.maxRetries) {
+      try {
+        await logService.putLogEvents(events);
+        break;
+      } catch (e: any) {
+        if (e.__type === 'ThrottlingException') {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          attempt++;
+        } else {
+          throw e;
+        }
+      }
+    }
   }
 }
