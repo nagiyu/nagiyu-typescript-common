@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/chat';
+import { ChatCompletionCreateParamsNonStreaming } from 'openai/resources';
 
 import { BadRequestError } from '@common/errors';
 import { OpenAIChatHistory, OpenAIChatOptions } from '@common/interfaces/OpenAIMessageType';
